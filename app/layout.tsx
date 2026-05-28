@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'Luci - AI Voice Assistant | Coming Soon',
   description: 'Hey Luci, bolo aur kaam ho jaaye. The AI voice assistant built for Windows with native support for Hindi, English & Hinglish.',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/luci.png',
   },
   openGraph: {
     title: 'Luci - AI Voice Assistant',
