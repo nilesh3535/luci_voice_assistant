@@ -493,8 +493,8 @@ export default function Home() {
             </div>
             <div className="text-xs text-gray-500 space-y-1">
               <p>📚 M.Sc. Computer Science</p>
-              <p>💻 3+ years Software Engineering</p>
-              <p>🤖 2+ years AI Automation</p>
+              <p>💻 3+ Years Software Engineering Experience</p>
+              <p>🤖 2+ Years AI Automation</p>
             </div>
           </motion.div>
 
