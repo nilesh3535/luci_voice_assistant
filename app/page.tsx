@@ -10,34 +10,11 @@ import {
   Volume2,
   Zap,
   ArrowRight,
-  Send,
 } from "lucide-react";
 import Image from "next/image";
 
-interface FormState {
-  email: string;
-  status: "idle" | "loading" | "success" | "error";
-  message: string;
-}
-
 const AnimatedOrb = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        setMousePos({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        });
-      }
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
 
   return (
     <motion.div
@@ -218,80 +195,6 @@ const FeatureCard = ({ icon: Icon, title, description, delay }: any) => (
 );
 
 export default function Home() {
-  const [formState, setFormState] = useState<FormState>({
-    email: "",
-    status: "idle",
-    message: "",
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!formState.email) {
-      setFormState((prev) => ({
-        ...prev,
-        status: "error",
-        message: "Please enter your email",
-      }));
-      return;
-    }
-
-    setFormState((prev) => ({
-      ...prev,
-      status: "loading",
-    }));
-
-    try {
-      const response = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formState.email,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setFormState((prev) => ({
-          ...prev,
-          status: "success",
-          message: "Thanks for joining! 🎉 Check your email for updates.",
-          email: "",
-        }));
-
-        setTimeout(() => {
-          setFormState((prev) => ({
-            ...prev,
-            status: "idle",
-            message: "",
-          }));
-        }, 5000);
-      } else if (result.isDuplicate) {
-        setFormState((prev) => ({
-          ...prev,
-          status: "error",
-          message: result.message,
-        }));
-      } else {
-        setFormState((prev) => ({
-          ...prev,
-          status: "error",
-          message: result.message || "Failed to join waitlist",
-        }));
-      }
-    } catch (error) {
-      setFormState((prev) => ({
-        ...prev,
-        status: "error",
-        message: "Connection error. Please try again.",
-      }));
-      console.error("Error:", error);
-    }
-  };
-
   return (
     <div className="min-h-screen overflow-hidden">
       {/* Animated background elements */}
