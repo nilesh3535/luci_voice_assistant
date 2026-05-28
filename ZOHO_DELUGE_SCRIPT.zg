@@ -1,0 +1,229 @@
+// Zoho Deluge Script for Luci Waitlist
+// Paste this into Zoho Sheet → Tools → Deluge Script
+
+// ⚙️ CONFIGURATION - UPDATE THESE
+adminEmail = "your-zoho-email@zohomail.in";
+senderName = "Luci";
+
+response = invokeurl(
+  [
+    URL: "https://your-webhook-url",
+    TYPE: "POST"
+  ]
+);
+
+// Function to handle form submission
+function handleWaitlistSubmission(email)
+{
+  // Validate email
+  if(email == null || email == "")
+  {
+    return {
+      "success": false,
+      "message": "Email is required"
+    };
+  }
+
+  if(!isValidEmail(email))
+  {
+    return {
+      "success": false,
+      "message": "Invalid email format"
+    };
+  }
+
+  // Check for duplicate email
+  emailLower = email.toLowerCase();
+  sheetName = "Luci Waitlist";
+
+  try
+  {
+    // Get all data from sheet
+    sheetData = getSheetData(sheetName);
+
+    for each record in sheetData
+    {
+      existingEmail = record.get("Email");
+      if(existingEmail != null)
+      {
+        if(existingEmail.toLowerCase() == emailLower)
+        {
+          return {
+            "success": false,
+            "message": "This email is already on our waitlist! 🎉",
+            "isDuplicate": true
+          };
+        }
+      }
+    }
+  }
+  catch(error)
+  {
+    info error;
+  }
+
+  // Add to sheet
+  try
+  {
+    timestamp = zoho.currenttime;
+
+    row = Map();
+    row.put("Email", email);
+    row.put("Timestamp", timestamp);
+    row.put("Status", "Active");
+
+    addToSheet(sheetName, row);
+
+    // Send emails
+    sendConfirmationEmail(email);
+    sendAdminNotification(email, timestamp);
+
+    return {
+      "success": true,
+      "message": "Email added successfully",
+      "email": email,
+      "timestamp": timestamp.toString()
+    };
+  }
+  catch(error)
+  {
+    return {
+      "success": false,
+      "message": "Error: " + error.toString()
+    };
+  }
+}
+
+// Function to validate email
+function isValidEmail(email)
+{
+  pattern = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+  if(email.match(pattern) != null)
+  {
+    return true;
+  }
+  return false;
+}
+
+// Function to get sheet data
+function getSheetData(sheetName)
+{
+  // Zoho Sheet API call
+  response = invokeurl(
+    [
+      URL: "https://sheet.zoho.in/api/v2/workbooks/{WORKBOOK_ID}/sheets/{SHEET_ID}/rows",
+      TYPE: "GET",
+      headers: map()
+    ]
+  );
+
+  return response.get("rows");
+}
+
+// Function to add row to sheet
+function addToSheet(sheetName, rowData)
+{
+  // Zoho Sheet API call
+  response = invokeurl(
+    [
+      URL: "https://sheet.zoho.in/api/v2/workbooks/{WORKBOOK_ID}/sheets/{SHEET_ID}/rows",
+      TYPE: "POST",
+      parameters: rowData
+    ]
+  );
+
+  return response;
+}
+
+// Send confirmation email to user
+function sendConfirmationEmail(userEmail)
+{
+  try
+  {
+    subject = "Welcome to Luci Waitlist! 🎤";
+
+    htmlBody = "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #000000 0%, #0B0C10 100%); padding: 40px 20px; border-radius: 10px; color: #ffffff;'>" +
+      "<div style='text-align: center; margin-bottom: 30px;'>" +
+      "<h1 style='color: #00D9FF; margin: 0; font-size: 32px;'>Welcome to Luci!</h1>" +
+      "<p style='color: #00F0FF; font-size: 14px; margin: 10px 0 0 0;'>🎤 Your AI Voice Assistant for Windows</p>" +
+      "</div>" +
+
+      "<div style='background: rgba(0, 217, 255, 0.1); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 8px; padding: 20px; margin: 20px 0;'>" +
+      "<h2 style='color: #00F0FF; margin-top: 0;'>Hey Luci, bolo aur kaam ho jaaye</h2>" +
+      "<p style='color: #cccccc; line-height: 1.6;'>You're now on the exclusive waitlist for Luci - the AI voice assistant built for Windows with native support for Hindi, English, and Hinglish.</p>" +
+      "</div>" +
+
+      "<div style='background: rgba(0, 217, 255, 0.05); border-left: 3px solid #00D9FF; padding: 15px; margin: 20px 0; border-radius: 4px;'>" +
+      "<h3 style='color: #00F0FF; margin-top: 0;'>What to Expect:</h3>" +
+      "<ul style='color: #cccccc; line-height: 1.8;'>" +
+      "<li>✨ Early access when Luci launches</li>" +
+      "<li>🎁 Exclusive features & updates</li>" +
+      "<li>💬 Direct access to our community</li>" +
+      "<li>🚀 Chance to shape the future of Luci</li>" +
+      "</ul>" +
+      "</div>" +
+
+      "<div style='text-align: center; margin: 30px 0;'>" +
+      "<a href='https://www.instagram.com/luci_voice_assistant' style='display: inline-block; background: linear-gradient(135deg, #00D9FF, #00F0FF); color: #000000; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;'>Follow on Instagram</a>" +
+      "</div>" +
+
+      "<hr style='border: none; border-top: 1px solid rgba(0, 217, 255, 0.2); margin: 30px 0;'>" +
+
+      "<div style='text-align: center; color: #888888; font-size: 12px;'>" +
+      "<p style='margin: 5px 0;'>© 2026 Luci. All rights reserved.</p>" +
+      "</div>" +
+      "</div>";
+
+    send_mail(
+      [
+        to: userEmail,
+        subject: subject,
+        message: htmlBody,
+        ishtml: true,
+        from: adminEmail
+      ]
+    );
+
+    info "Confirmation email sent to: " + userEmail;
+  }
+  catch(error)
+  {
+    info "Error sending confirmation email: " + error.toString();
+  }
+}
+
+// Send admin notification
+function sendAdminNotification(userEmail, timestamp)
+{
+  try
+  {
+    subject = "New Luci Waitlist Signup";
+
+    textBody = "New Luci Waitlist Signup!\n\n" +
+      "Email: " + userEmail + "\n" +
+      "Time: " + timestamp.toString() + "\n\n" +
+      "View your waitlist in Zoho Sheet";
+
+    send_mail(
+      [
+        to: adminEmail,
+        subject: subject,
+        message: textBody
+      ]
+    );
+
+    info "Admin notification sent to: " + adminEmail;
+  }
+  catch(error)
+  {
+    info "Error sending admin notification: " + error.toString();
+  }
+}
+
+// Main webhook handler
+@ZohoWebhook
+function handleWebhook(webhookPayload)
+{
+  result = handleWaitlistSubmission(webhookPayload.get("email"));
+  return result;
+}
