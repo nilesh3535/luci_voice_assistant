@@ -153,3 +153,4 @@ All rights reserved. Luci is a proprietary product.
 
 Built with ❤️ using Next.js, React, and Framer Motion
 "# luci_voice_assistant" 
+"# luci_voice_assistant" 
