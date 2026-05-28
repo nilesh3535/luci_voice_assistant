@@ -108,7 +108,7 @@ const AnimatedOrb = () => {
 
 const TerminalAnimation = () => {
   const [displayText, setDisplayText] = useState("");
-  const fullText = "Hey Luci, terminal open karke start npm run dev";
+  const fullText = "Open notepad and write what I am saying";
   const [isTyping, setIsTyping] = useState(true);
 
   useEffect(() => {
@@ -144,7 +144,7 @@ const TerminalAnimation = () => {
         <span className="text-xs text-cyan ml-4">luci.terminal</span>
       </div>
       <div className="px-6 py-6 font-mono text-sm text-cyan-light">
-        <div className="mb-2 text-cyan/60">$ luci voice-command</div>
+        <div className="mb-2 text-cyan/60">$ luci note</div>
         <div className="flex items-center gap-2">
           <span className="text-cyan">&gt;</span>
           <span>{displayText}</span>
@@ -164,9 +164,9 @@ const TerminalAnimation = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <div>✓ Opening terminal...</div>
-            <div>✓ Starting dev server...</div>
-            <div className="text-cyan">🎤 Listening for voice commands</div>
+            <div>✓ Opening Notepad...</div>
+            <div>✓ Listening to your voice...</div>
+            <div className="text-cyan">🎤 Writing in real-time</div>
           </motion.div>
         )}
       </div>
